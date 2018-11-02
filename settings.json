@@ -1,0 +1,8 @@
+{ "protocol":"http",
+  "home_server":"matrix.org",
+  "username":"narkoman",
+  "password":"password1",
+  "room_name":"#example:matrix.org",
+  "modules":["core", "urban dictionary"],
+  "module_prompt":"%"
+}
