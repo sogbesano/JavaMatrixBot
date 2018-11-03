@@ -16,12 +16,6 @@ public class Acronym implements Module {
             acronymLength = Integer.parseInt((String) params.get(0));
         }
         Random random = new Random();
-        if(params.size() == 0) {
-            for(int i = 0; i < acronymLength; i++) {
-                acronymStr += letters[random.nextInt(letters.length)];
-            }
-            return acronymStr;
-        }
         for(int i = 0; i < acronymLength; i++) {
             acronymStr += letters[random.nextInt(letters.length)];
         }
