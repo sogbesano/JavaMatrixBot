@@ -13,7 +13,7 @@ public class Core implements Module {
         int cawLength = random.nextInt(max) + min;
         String caw = "C";
         char upperCaseA = 'A';
-        for(int i = 0; i < cawLength; i++) {
+        for (int i = 0; i < cawLength; i++) {
             caw += upperCaseA;
         }
         caw += "W";
@@ -22,7 +22,7 @@ public class Core implements Module {
 
     public static String listmodules(Object[] modules) {
         String listModulesStr = "[";
-        for(Object module : modules) {
+        for (Object module : modules) {
             Module mod = (Module) module;
             listModulesStr += mod.getName() + ",";
         }
@@ -34,10 +34,10 @@ public class Core implements Module {
     public static String listcommands(Object[] modules) {
         List<Method> allModuleCommandMethods = null;
         String listCommandsStr = "[";
-        for(Object module : modules) {
+        for (Object module : modules) {
             Module mod = (Module) module;
             allModuleCommandMethods = Utils.getStaticMethods(mod.getClass());
-            for(Method moduleCommandMethod : allModuleCommandMethods) {
+            for (Method moduleCommandMethod : allModuleCommandMethods) {
                 listCommandsStr += moduleCommandMethod.getName() + ",";
             }
         }
@@ -49,29 +49,28 @@ public class Core implements Module {
     public static ModulesAndModuleCommandResponse loadmodule(Object[] modules, String moduleName) {
         List<Module> loadedModules = new ArrayList<>();
         ModulesAndModuleCommandResponse modulesAndModuleCommandResponse = null;
-        for(Object module : modules) {
+        for (Object module : modules) {
             loadedModules.add((Module) module);
         }
         String moduleCommandResponse = "";
-        for(Object module : modules) {//module already loaded
+        for (Object module : modules) {//module already loaded
             Module mod = (Module) module;
-            if(moduleName.equals(mod.getName())) {
-               moduleCommandResponse += mod.getName() + " already loaded";
-               modulesAndModuleCommandResponse = new ModulesAndModuleCommandResponse(loadedModules, moduleCommandResponse);
-               return modulesAndModuleCommandResponse;
+            if (moduleName.equals(mod.getName())) {
+                moduleCommandResponse += mod.getName() + " already loaded";
+                modulesAndModuleCommandResponse = new ModulesAndModuleCommandResponse(loadedModules, moduleCommandResponse);
+                return modulesAndModuleCommandResponse;
             }
         }
-        for(Object module : modules) {//module not loaded
-                if(moduleName.equals("core")) {
-                    loadedModules.add(new Core());
-                    moduleCommandResponse += "core loaded";
-                } else if(moduleName.equals("urban dictionary")) {
-                    loadedModules.add(new UrbanDictionary());
-                    moduleCommandResponse +=  "urban dictionary loaded";
-                } else if(moduleName.equals("acronym")) {
-                    loadedModules.add(new Acronym());
-                    moduleCommandResponse +=  "acronym loaded";
-                }
+        //module not loaded
+        if (moduleName.equals("core")) {
+            loadedModules.add(new Core());
+            moduleCommandResponse += "core loaded";
+        } else if (moduleName.equals("urban dictionary")) {
+            loadedModules.add(new UrbanDictionary());
+            moduleCommandResponse += "urban dictionary loaded";
+        } else if (moduleName.equals("acronym")) {
+            loadedModules.add(new Acronym());
+            moduleCommandResponse += "acronym loaded";
         }
         modulesAndModuleCommandResponse = new ModulesAndModuleCommandResponse(loadedModules, moduleCommandResponse);
         return modulesAndModuleCommandResponse;
@@ -81,20 +80,20 @@ public class Core implements Module {
         List<Module> loadedModules = new ArrayList<>();
         String moduleCommandResponse = "";
         ModulesAndModuleCommandResponse modulesAndModuleCommandResponse = null;
-        for(Object module : modules) {
+        for (Object module : modules) {
             loadedModules.add((Module) module);
         }
         List<Module> removedModule = new ArrayList<>();
-        for(Object module : modules) {//module loaded
+        for (Object module : modules) {//module loaded
             Module mod = (Module) module;
-            if(mod.getName().equals(moduleName) && !mod.getName().equals("core")) {
+            if (mod.getName().equals(moduleName) && !mod.getName().equals("core")) {
                 moduleCommandResponse += mod.getName() + " unloaded";
                 modulesAndModuleCommandResponse = new ModulesAndModuleCommandResponse(removedModule, moduleCommandResponse);
                 return modulesAndModuleCommandResponse;
             }
             removedModule.add(mod);
         }
-        if(!moduleName.equals("core")) {
+        if (!moduleName.equals("core")) {
             moduleCommandResponse = moduleName + " not loaded";//module not loaded
         } else {
             moduleCommandResponse = moduleName + " cannot be unloaded";
