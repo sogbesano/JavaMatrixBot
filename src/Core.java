@@ -70,6 +70,7 @@ public class Core implements Module {
                     moduleCommandResponse +=  "urban dictionary loaded";
                 } else if(moduleName.equals("acronym")) {
                     loadedModules.add(new Acronym());
+                    moduleCommandResponse +=  "acronym loaded";
                 }
         }
         modulesAndModuleCommandResponse = new ModulesAndModuleCommandResponse(loadedModules, moduleCommandResponse);
