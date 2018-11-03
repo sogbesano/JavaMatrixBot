@@ -6,10 +6,7 @@ import java.util.Random;
 public class Acronym implements Module {
 
     public static String acronym(List<Object> params) {
-        char[] letters = new char[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
-                                    'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
-                                    'q', 'r', 's', 't', 'u', 'v', 'w', 'x',
-                                    'y', 'z'};
+        char[] letters = "abcdefghijklmnopqrstuvwxyz".toCharArray();
         String acronymStr = "";
         int acronymLength = 5;
         if(params.size() != 0) {
