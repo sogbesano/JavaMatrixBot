@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="MatrixBot:jar">
+    <output-path>$PROJECT_DIR$</output-path>
+    <root id="archive" name="MatrixBot.jar">
+      <element id="module-output" name="MatrixBot" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/deps/gson-2.8.5.jar" path-in-jar="/" />
+      <element id="library" level="project" name="MatrixBot" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/deps/commons-logging-1.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/deps/httpclient-4.3.4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/deps/httpcore-4.4.3.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

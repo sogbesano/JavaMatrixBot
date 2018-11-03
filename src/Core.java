@@ -1,7 +1,8 @@
 import java.lang.reflect.Method;
-import java.util.*;
-
-import static java.util.Arrays.asList;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 public class Core implements Module {
 
@@ -67,6 +68,8 @@ public class Core implements Module {
                 } else if(moduleName.equals("urban dictionary")) {
                     loadedModules.add(new UrbanDictionary());
                     moduleCommandResponse +=  "urban dictionary loaded";
+                } else if(moduleName.equals("acronym")) {
+                    loadedModules.add(new Acronym());
                 }
         }
         modulesAndModuleCommandResponse = new ModulesAndModuleCommandResponse(loadedModules, moduleCommandResponse);
@@ -102,7 +105,7 @@ public class Core implements Module {
     @Override
     public List<Method> getAllMethods() {
         Class coreClass = Core.class;
-        List<Method> allMethods = asList(coreClass.getDeclaredMethods());
+        List<Method> allMethods = Arrays.asList(coreClass.getDeclaredMethods());
         return allMethods;
     }
 

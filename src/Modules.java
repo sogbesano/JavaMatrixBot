@@ -10,9 +10,10 @@ public class Modules {
         for(String moduleName : moduleNames) {
             if(moduleName.equals("core")) {
                 modules.add(new Core());
-            }
-            if(moduleName.equals("urban dictionary")) {
+            } else if(moduleName.equals("urban dictionary")) {
                 modules.add(new UrbanDictionary());
+            } else if(moduleName.equals("acronym")) {
+                modules.add(new Acronym());
             }
         }
         return modules;
