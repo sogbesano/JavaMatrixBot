@@ -10,88 +10,85 @@ import java.util.Map;
 
 public class App {
 
+    public static List<Module> getModules(SettingsJson settings) {
+        List<String> moduleNames = settings.getModules();
+        List<Module> modules = Modules.loadModules(moduleNames);
+        return modules;
+    }
+
     public static void main(String[] args) throws IOException, InvocationTargetException, IllegalAccessException {
         String settingsJsonStr = Utils.readFile(new File("settings.json").getAbsolutePath());
-        System.out.println(settingsJsonStr);
-        Gson gson = new Gson();
-        SettingsJson settingsJson = gson.fromJson(settingsJsonStr, SettingsJson.class);
-        System.out.println(settingsJson);
-        String protocol = settingsJson.getProtocol();
-        String homeServer = settingsJson.getHomeServer();
-        String username = settingsJson.getUsername();
-        String password = settingsJson.getPassword();
-        String loginFlowsJson = Matrix.getLoginFlows(protocol, homeServer, "r0");
-        System.out.println(loginFlowsJson);
-        LoginJsonResponse loginJsonResponse = Matrix.login(protocol, homeServer, "api/v1", username, password);
-        System.out.println(loginJsonResponse);
-        String accessToken = loginJsonResponse.getAccessToken();
-        String userID = loginJsonResponse.getUserID();
-        String deviceID = loginJsonResponse.getDeviceID();
-        String publicRoomsJsonStr = Matrix.publicRooms(protocol, homeServer, "unstable");
-        System.out.println(publicRoomsJsonStr);
-        ArrayList publicRoomsJsonList = Utils.getPublicRoomsJsonList(publicRoomsJsonStr);
-        List<Map<String, String>> canonicalAliasesAndRoomIDs = Matrix.getCanonicalAliasesAndRoomsIDs(publicRoomsJsonList);
-        System.out.println(canonicalAliasesAndRoomIDs);
-        String roomID = Matrix.getRoomID(settingsJson.getRoomName(), canonicalAliasesAndRoomIDs);
-        System.out.println(roomID);
-        Matrix.joinByID(protocol, homeServer, "r0", roomID, accessToken);
-        //Matrix.sendMessage(protocol, homeServer, "r0", roomID, accessToken, "Hello, from Java.");
-        String syncStr = Matrix.sync(protocol, homeServer, "r0", accessToken);
-        List<String> moduleNames = settingsJson.getModules();
-        List<Module> modules = Modules.loadModules(moduleNames);
+        SettingsJson settings = new Gson().fromJson(settingsJsonStr, SettingsJson.class);
+        Matrix connection = new Matrix(settings);
+
+        connection.login();
+        String publicRoomsStr = connection.publicRooms();
+        ArrayList publicRoomsList = Utils.getPublicRoomsJsonList(publicRoomsStr);
+        List<Map<String, String>> canonicalAliasesAndRoomIDs = connection.getCanonicalAliasesAndRoomsIDs(
+                publicRoomsList
+        );
+        String roomID = connection.getRoomID(canonicalAliasesAndRoomIDs);
+        connection.joinByID(roomID);
+
+        // initial sync
+        connection.sync();
+
+        List<Module> modules = getModules(settings);
+
         while (true) {
-            MessageJson lastMessageJson = Matrix.extractLastMessage(protocol, homeServer, accessToken, roomID);
-            Matrix.markRead(protocol, homeServer, "unstable", roomID, lastMessageJson.getEventID(), accessToken);
-            System.out.println(lastMessageJson);
-            System.out.println(modules);
+            MessageJson lastMessageJson = connection.extractLastMessage(roomID);
             if (!modules.isEmpty()) {
-                if (lastMessageJson.getBody().startsWith(settingsJson.getModulePrompt())) {
+                if (lastMessageJson.getBody().startsWith(settings.getModulePrompt())) {
                     for (Module module : modules) {
-                        String moduleCommandName = Modules.getModuleCommandName(lastMessageJson, settingsJson);
-                        if (moduleCommandName.length() > 1) {
-                            Method moduleCommandMethod = Modules.getModuleCommandMethod(moduleCommandName, module.getAllMethods());
-                            //System.out.println(moduleCommandMethod.getName());
-                            if (moduleCommandMethod != null) {
-                                if (moduleCommandName.equals(lastMessageJson.getBody().contains(" ") ? lastMessageJson.getBody().substring(1, lastMessageJson.getBody().indexOf(" ")) : lastMessageJson.getBody().substring(1, lastMessageJson.getBody().length()))) {
-                                    int moduleCommandMethodParameterCount = moduleCommandMethod.getParameterCount();
-                                    if (moduleCommandMethodParameterCount == 0) {
-                                        String moduleCommandResponse = (String) moduleCommandMethod.invoke(module);
-                                        if (!moduleCommandResponse.isEmpty()) {
-                                            Matrix.sendMessage(protocol, homeServer, "r0", roomID, accessToken, moduleCommandResponse);
+                        String moduleCommand = Modules.getModuleCommandName(lastMessageJson, settings);
+                        if (moduleCommand.length() > 0) {
+                            Method method = Modules.getModuleCommandMethod(moduleCommand, module.getAllMethods());
+                            if (method != null) {
+                                String userCommand = lastMessageJson.getBody().substring(1);
+                                if (lastMessageJson.getBody().contains(" ")) {
+                                    userCommand = userCommand.substring(0, userCommand.indexOf(" "));
+                                }
+                                if (moduleCommand.equals(userCommand)) {
+                                    int paramCount = method.getParameterCount();
+                                    if (paramCount == 0) {
+                                        String response = (String) method.invoke(module);
+                                        if (!response.isEmpty()) {
+                                            connection.sendMessage(roomID, response);
                                         }
-                                    } else if (moduleCommandMethodParameterCount == 1) {
-                                        List<Object> moduleCommandParameters = Modules.getModuleCommandParameters(lastMessageJson);
-                                        System.out.println(moduleCommandParameters);
-                                        Class<?>[] moduleCommandParameterTypes = moduleCommandMethod.getParameterTypes();
-                                        if (moduleCommandParameterTypes[0].equals(Object[].class)) {
+                                    } else if (paramCount == 1) {
+                                        List<Object> params = Modules.getModuleCommandParameters(lastMessageJson);
+                                        Class<?>[] paramTypes = method.getParameterTypes();
+                                        if (paramTypes[0].equals(Object[].class)) {
                                             Object[] modulesArr = modules.toArray();
-                                            String moduleCommandResponse = (String) moduleCommandMethod.invoke(module, new Object[]{modulesArr});
-                                            if (!moduleCommandResponse.isEmpty()) {
-                                                Matrix.sendMessage(protocol, homeServer, "r0", roomID, accessToken, moduleCommandResponse);
+                                            String response = (String) method.invoke(module, new Object[]{modulesArr});
+                                            if (!response.isEmpty()) {
+                                                connection.sendMessage(roomID, response);
                                             }
                                         } else {
-                                            String moduleCommandResponse = (String) moduleCommandMethod.invoke(module, moduleCommandParameters);
-                                            if (!moduleCommandResponse.isEmpty()) {
-                                                Matrix.sendMessage(protocol, homeServer, "r0", roomID, accessToken, moduleCommandResponse);
+                                            String response = (String) method.invoke(module, params);
+                                            if (!response.isEmpty()) {
+                                                connection.sendMessage(roomID, response);
                                             }
                                         }
-                                    } else if (moduleCommandMethodParameterCount == 2) {
-                                        List<Object> moduleCommandParameters = Modules.getModuleCommandParameters(lastMessageJson);
-                                        Class<?>[] moduleCommandParameterTypes = moduleCommandMethod.getParameterTypes();
-                                        if (moduleCommandParameterTypes[0].equals(Object[].class) && moduleCommandParameterTypes[1].equals(String.class)) {
-                                            if (moduleCommandParameters.size() >= 1) {
-                                                String moduleCommandParametersStr = "";
-                                                for (Object moduleCommandParameter : moduleCommandParameters) {
-                                                    moduleCommandParametersStr += moduleCommandParameter + " ";
+                                    } else if (paramCount == 2) {
+                                        List<Object> params = Modules.getModuleCommandParameters(lastMessageJson);
+                                        Class<?>[] paramTypes = method.getParameterTypes();
+                                        if (paramTypes[0].equals(Object[].class) && paramTypes[1].equals(String.class)) {
+                                            if (params.size() >= 1) {
+                                                String paramsStr = "";
+                                                for (Object param : params) {
+                                                    paramsStr += param + " ";
                                                 }
-                                                moduleCommandParametersStr = moduleCommandParametersStr.substring(0, moduleCommandParametersStr.length() - 1);//remove end space
+                                                // remove end space
+                                                paramsStr = paramsStr.substring(0, paramsStr.length() - 1);
                                                 Object[] modulesArr = modules.toArray();
-                                                ModulesAndModuleCommandResponse modulesAndModuleCommandResponse = (ModulesAndModuleCommandResponse) moduleCommandMethod.invoke(module, modulesArr, moduleCommandParametersStr);
-                                                modules = modulesAndModuleCommandResponse.getModules();
-                                                String moduleCommandResponse = modulesAndModuleCommandResponse.getModuleCommandResponse();
+                                                ModulesAndModuleCommandResponse modulesResponse =
+                                                        (ModulesAndModuleCommandResponse) method.invoke(module, modulesArr, paramsStr);
+                                                modules = modulesResponse.getModules();
+                                                String response = modulesResponse.getModuleCommandResponse();
 
-                                                if (!moduleCommandResponse.isEmpty()) {
-                                                    Matrix.sendMessage(protocol, homeServer, "r0", roomID, accessToken, moduleCommandResponse);
+                                                if (!response.isEmpty()) {
+                                                    connection.sendMessage(roomID, response);
                                                 }
                                             }
                                         }
@@ -101,16 +98,15 @@ public class App {
                         }
                     }
                 }
+
                 for (Module module : modules) {
                     String response = module.noPrompt(lastMessageJson.getBody().split(" "));
                     if (response.length() > 0) {
-                        Matrix.sendMessage(protocol, homeServer, "r0", roomID, accessToken, response);
+                        connection.sendMessage(roomID, response);
                     }
                 }
             }
-            if (lastMessageJson.getBody().equals("hello bot")) {
-                Matrix.sendMessage(protocol, homeServer, "r0", roomID, accessToken, "yo what's up");
-            }
+            connection.markRead(roomID, lastMessageJson.getEventID());
         }
     }
 }

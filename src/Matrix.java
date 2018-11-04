@@ -18,163 +18,178 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Matrix {
-	
-	public static String buildUrl(String protocol, String homeServer, String version, String endpoint, String accessToken, Map<String, String> params) {
-		String url = protocol + "://" + homeServer + "/_matrix/client/" + version + "/" + endpoint;
-		String paramsStr = Matrix.makeParams(params);
-		if(!paramsStr.isEmpty()) {
-			url += "?" + paramsStr;
-		} 
-		if(!accessToken.isEmpty()) {
-			url += "?" + "access_token=" + accessToken;
-		}
-		return url;
-	}
-	
-	public static String makeParams(Map<String, String> params) {
-		if(params.isEmpty()) {
-			return "";
-		}
-		String paramsStr = "";
-		for (Map.Entry<String,String> param : params.entrySet()) {
-		    String key = param.getKey();
-		    String value = param.getValue();
-		    paramsStr += key + "=" + value + "&";
-		}
-		return paramsStr.substring(0, paramsStr.length() - 1); //strip end &
-	}
-	
-	public static String GET(String protocol, String homeServer, String version, String endPoint, String accessToken, Map<String, String> params) throws IOException {
-		String urlStr = Matrix.buildUrl(protocol, homeServer, version, endPoint, accessToken, params);
-		URL url = new URL(urlStr);
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-		conn.setRequestMethod("GET");
-		BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-		String line;
-		StringBuilder result = new StringBuilder();
-		while((line = br.readLine()) != null) {
-			result.append(line);
-		}
-		br.close();
-		return result.toString();
+class Matrix {
+	private String protocol;
+	private String homeServer;
+	private String username;
+	private String password;
+
+	// If more than one version must be supported, duplicate the appropriate
+    // methods, i.e. buildUrl, and pass a version parameter to them too.
+	private String defaultVersion = "unstable";
+
+	private String accessToken;
+	private String roomName;
+	private String userID;
+
+	public Matrix(SettingsJson settings) {
+		this.protocol = settings.getProtocol();
+		this.homeServer = settings.getHomeServer();
+		this.username = settings.getUsername();
+		this.password = settings.getPassword();
+		this.roomName = settings.getRoomName();
+		this.accessToken = "";
+		this.userID = "";
 	}
 
-	public static String POSTJSON(String protocol, String homeServer, String version, String endPoint, String accessToken, Map<String, String> params, Object json) throws IOException {
-		String postUrl = Matrix.buildUrl(protocol, homeServer, version, endPoint, accessToken, params);
-		Gson gson = new Gson();
-		HttpClient httpClient = HttpClientBuilder.create().build();
-		HttpPost post = new HttpPost(postUrl);
-		StringEntity postingString = new StringEntity(gson.toJson(json));
-		post.setEntity(postingString);
-		post.setHeader("Content-type", "application/json");
-		HttpResponse response = httpClient.execute(post);
-		InputStream contentIS = response.getEntity().getContent();
-		BufferedReader br = new BufferedReader(new InputStreamReader(contentIS));
-		StringBuilder sb = new StringBuilder();
-		String line = "";
-		while((line = br.readLine()) != null) {
-			sb.append(line);
-		}
-		contentIS.close();
-		String jsonResponse = sb.toString();
-		return jsonResponse;
-	}
+	private String buildUrl(String endpoint, Map<String, String> params) {
+	    String url = this.protocol + "://" + this.homeServer + "/_matrix/client/" +
+                     this.defaultVersion + "/" + endpoint;
+	    char concat = '?';
 
-	public static String POST(String protocol, String homeServer, String version, String endPoint, String accessToken, Map<String, String> params) throws IOException {
-		String postUrl = Matrix.buildUrl(protocol, homeServer, version, endPoint, accessToken, params);
-		System.out.println("POST URL: " + postUrl);
-		Gson gson = new Gson();
-		HttpClient httpClient = HttpClientBuilder.create().build();
-		HttpPost post = new HttpPost(postUrl);
-		HttpResponse response = httpClient.execute(post);
-		InputStream contentIS = response.getEntity().getContent();
-		BufferedReader br = new BufferedReader(new InputStreamReader(contentIS));
-		StringBuilder sb = new StringBuilder();
-		String line = "";
-		while((line = br.readLine()) != null) {
-			sb.append(line);
-		}
-		contentIS.close();
-		String jsonResponse = sb.toString();
-		return jsonResponse;
-	}
-	
-	public static LoginJsonResponse login(String protocol, String homeServer, String version, String username, String password) throws IOException {
-		LoginJson loginJson = new LoginJson("m.login.password", username, password);
-		Map<String, String> params = new HashMap<>();
-		String loginJsonResponseStr = Matrix.POSTJSON(protocol, homeServer, version, "login", "", params, loginJson);
-		Gson gson = new Gson();
-		LoginJsonResponse loginJsonResponse = gson.fromJson(loginJsonResponseStr, LoginJsonResponse.class);
-		return loginJsonResponse;
-	}
+        String paramsStr = this.makeParams(params);
+	    if (!paramsStr.isEmpty()) {
+	        url += concat + paramsStr;
+	        concat = '&';
+        }
+        if (!this.accessToken.isEmpty()) {
+            url += concat + "access_token=" + this.accessToken;
+        }
 
-	public static String getLoginFlows(String protocol, String homeServer, String version) throws IOException {
-		Map<String,String> params = new HashMap<>();
-		String loginFlowsJsonStr = Matrix.GET(protocol, homeServer, version, "login", "", params);
-	    return loginFlowsJsonStr;
-	}
+        return url;
+    }
 
-	public static String publicRooms(String protocol, String homeServer, String version) throws IOException {
-		Map<String, String> params = new HashMap<>();
-		String publicRoomsJson = Matrix.GET(protocol, homeServer, version, "publicRooms", "", params);
-	    return publicRoomsJson;
-	}
+    private String makeParams(Map<String, String> params) {
+	    if (params == null || params.isEmpty()) {
+	        return "";
+        }
+        String paramsStr = "";
+	    for (Map.Entry<String, String> param : params.entrySet()) {
+	        paramsStr += param.getKey() + '=' + param.getValue() + '&';
+        }
+        return paramsStr.substring(0, paramsStr.length() - 1); // strip end &
+    }
 
-	public static List<Map<String, String>> getCanonicalAliasesAndRoomsIDs(ArrayList publicRoomsJsonList) {
-		List<Map<String, String>> canonicalAliasAndRoomIDList = new ArrayList<>();
-		Gson gson = new Gson();
-		for(int i = 0; i < publicRoomsJsonList.size(); i++) {
-			Map<String, String> canonicalAliasAndRoomID = new HashMap<>();
-			PublicRoomsJson publicRoomsJson = gson.fromJson(gson.toJson(publicRoomsJsonList.get(i)), PublicRoomsJson.class);
-			canonicalAliasAndRoomID.put("canonical alias", publicRoomsJson.getCanonicalAlias());
-			canonicalAliasAndRoomID.put("room id", publicRoomsJson.getRoomID());
-			canonicalAliasAndRoomIDList.add(canonicalAliasAndRoomID);
-		}
-  		return canonicalAliasAndRoomIDList;
-	}
+    private String GET(String endpoint, Map<String, String> params) throws IOException {
+	    URL url = new URL(this.buildUrl(endpoint, params));
+	    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+	    conn.setRequestMethod("GET");
 
-	public static String getRoomID(String canonicalAlias, List<Map<String, String>> canonicalAliasesAndRoomIDs) {
-		String roomID = "";
-		for(Map<String, String> canonicalAliasAndRoomID :  canonicalAliasesAndRoomIDs) {
-			if(canonicalAlias.equals(canonicalAliasAndRoomID.get("canonical alias"))) {
-				roomID = canonicalAliasAndRoomID.get("room id");
-			}
-		}
-		return roomID;
-	}
+	    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+	    StringBuilder result = new StringBuilder();
 
-	public static void joinByID(String protocol, String homeServer, String version, String roomID, String accessToken) throws IOException {
-		Map<String, String> params = new HashMap<>();
-	    Matrix.POST(protocol, homeServer, version, "rooms/" + roomID + "/join", accessToken, params);
-	}
+	    String line;
+	    while ((line = br.readLine()) != null) {
+	        result.append(line);
+        }
 
-	public static void sendMessage(String protocol, String homeServer, String version, String roomID, String accessToken, String messageBody) throws IOException {
-		SendMessageJson sendMessageJson = new SendMessageJson("m.text", messageBody);
-		Map<String, String> params = new HashMap<>();
-		Matrix.POSTJSON(protocol, homeServer, version, "rooms/" + roomID + "/send/m.room.message", accessToken, params, sendMessageJson);
-	}
+        br.close();
+	    return result.toString();
+    }
 
-	public static String sync(String protocol, String homeServer, String version, String accessToken) throws IOException {
-		Map<String, String> params = new HashMap<>();
-		String syncJsonStr = Matrix.GET(protocol, homeServer, version, "sync", accessToken, params);
-	    return syncJsonStr;
-	}
+    private String POST(String endpoint, Map<String, String> params, Object json) throws IOException {
+	    // This version posts with data
+        String url = this.buildUrl(endpoint, params);
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        HttpPost post = new HttpPost(url);
 
-	public static MessageJson extractLastMessage(String protocol, String homeServer, String accessToken, String roomID) throws IOException {
-		String syncStr = Matrix.sync(protocol, homeServer, "r0", accessToken);
-		Gson gson = new Gson();
-		JsonObject jsonObject = gson.fromJson(syncStr, JsonObject.class);
-		JsonArray messagesList = jsonObject.get("rooms").getAsJsonObject().get("join").getAsJsonObject().get(roomID).getAsJsonObject().get("timeline").getAsJsonObject().get("events").getAsJsonArray();
-		JsonElement lastMessage = messagesList.get(messagesList.size() - 1);
-		MessageJson lastMessageJson = gson.fromJson(lastMessage.toString(), MessageJson.class);
-		return lastMessageJson;
-	}
+        if (json != null) {
+            Gson gson = new Gson();
+            StringEntity postingString = new StringEntity(gson.toJson(json));
+            post.setEntity(postingString);
+            post.setHeader("Content-type", "application/json");
+        }
 
-	public static String markRead(String protocol, String homeServer, String version, String roomID, String eventID, String accessToken) throws IOException {
-		MarkReadJson markReadJson = new MarkReadJson(eventID, eventID);
-		Map<String, String> params = new HashMap<>();
-		String markReadJsonResponseStr = Matrix.POSTJSON(protocol, homeServer, version, "rooms/" + roomID + "/read_markers", accessToken, params, markReadJson);
-		return markReadJsonResponseStr;
-	}
+        HttpResponse response = httpClient.execute(post);
+        InputStream content = response.getEntity().getContent();
+        BufferedReader br = new BufferedReader(new InputStreamReader(content));
+        StringBuilder sb = new StringBuilder();
+
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line);
+        }
+
+        content.close();
+        return sb.toString();
+    }
+
+    private String POST(String endpoint, Map<String, String> params) throws IOException {
+	    // This version posts without data
+        return this.POST(endpoint, params, null);
+    }
+
+    public LoginJsonResponse login() throws IOException {
+	    LoginJson json = new LoginJson("m.login.password", this.username, this.password);
+	    String loginJsonResponseStr = this.POST("login", null, json);
+	    Gson gson = new Gson();
+	    LoginJsonResponse response = gson.fromJson(loginJsonResponseStr, LoginJsonResponse.class);
+	    this.accessToken = response.getAccessToken();
+	    this.userID = response.getUserID();
+	    return response;
+    }
+
+    public String getLoginFlows() throws IOException {
+	    return this.GET("login", null);
+    }
+
+    public String publicRooms() throws IOException {
+	    return this.GET("publicRooms", null);
+    }
+
+    public List<Map<String, String>> getCanonicalAliasesAndRoomsIDs(ArrayList publicRoomsJsonList) {
+	    List<Map<String, String>> canonicalAliasAndRoomIDList = new ArrayList<>();
+	    Gson gson = new Gson();
+	    for (int i = 0; i < publicRoomsJsonList.size(); i++) {
+            Map<String, String> canonicalAliasAndRoomID = new HashMap<>();
+            PublicRoomsJson publicRoomsJson = gson.fromJson(gson.toJson(publicRoomsJsonList.get(i)),
+                                                            PublicRoomsJson.class);
+            canonicalAliasAndRoomID.put("canonical alias", publicRoomsJson.getCanonicalAlias());
+            canonicalAliasAndRoomID.put("room id", publicRoomsJson.getRoomID());
+            canonicalAliasAndRoomIDList.add(canonicalAliasAndRoomID);
+        }
+        return canonicalAliasAndRoomIDList;
+    }
+
+    public String getRoomID(List<Map<String, String>> canonicalAliasesAndRoomIDs) {
+	    String roomID = "";
+	    for (Map<String, String> canonicalAliasAndRoomID : canonicalAliasesAndRoomIDs) {
+	        if (this.roomName.equals(canonicalAliasAndRoomID.get("canonical alias"))) {
+	            roomID = canonicalAliasAndRoomID.get("room id");
+            }
+        }
+        return roomID;
+    }
+
+    public void joinByID(String roomID) throws IOException {
+	    this.POST("rooms/" + roomID + "/join", null);
+    }
+
+    public void sendMessage(String roomID, String messageBody) throws IOException {
+	    SendMessageJson data = new SendMessageJson("m.text", messageBody);
+	    this.POST("rooms/" + roomID + "/send/m.room.message", null, data);
+    }
+
+    public String sync() throws IOException {
+	    return this.GET("sync", null);
+    }
+
+    public MessageJson extractLastMessage(String roomID) throws IOException {
+	    String syncStr = this.sync();
+	    Gson gson = new Gson();
+	    JsonObject json = gson.fromJson(syncStr, JsonObject.class);
+	    JsonArray messagesList = json.get("rooms").getAsJsonObject()
+                                     .get("join").getAsJsonObject()
+                                     .get(roomID).getAsJsonObject()
+                                     .get("timeline").getAsJsonObject()
+                                     .get("events").getAsJsonArray();
+
+	    JsonElement lastMessage = messagesList.get(messagesList.size() - 1);
+	    return gson.fromJson(lastMessage.toString(), MessageJson.class);
+    }
+
+    public String markRead(String roomID, String eventID) throws IOException {
+	    MarkReadJson data = new MarkReadJson(eventID, eventID);
+	    return this.POST("rooms/" + roomID + "/read_markers", null, data);
+    }
 }
