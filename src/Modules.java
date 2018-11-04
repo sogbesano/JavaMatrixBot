@@ -14,7 +14,7 @@ public class Modules {
                 modules.add(new UrbanDictionary());
             } else if(moduleName.equals("acronym")) {
                 modules.add(new Acronym());
-            } else if(moduleName.equals("yes / no")) {
+            } else if(moduleName.equals("yesno")) {
                 modules.add(new YesNo());
             }
         }

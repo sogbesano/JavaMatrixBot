@@ -19,7 +19,7 @@ public class YesNo implements Module {
 
     @Override
     public String getName() {
-        return "yes / no";
+        return "yesno";
     }
 
     @Override

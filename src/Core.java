@@ -71,7 +71,7 @@ public class Core implements Module {
         } else if (moduleName.equals("acronym")) {
             loadedModules.add(new Acronym());
             moduleCommandResponse += "acronym loaded";
-        } else if (moduleName.equals("yes / no")) {
+        } else if (moduleName.equals("yesno")) {
             loadedModules.add(new YesNo());
             moduleCommandResponse += "yes / no loaded";
         }
