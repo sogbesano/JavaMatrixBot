@@ -49,4 +49,7 @@ public class UrbanDictionary implements Module {
     public String getName() {
         return "urban dictionary";
     }
+
+    @Override
+    public String noPrompt(String[] body) { return ""; }
 }

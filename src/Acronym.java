@@ -30,4 +30,9 @@ public class Acronym implements Module {
     public String getName() {
         return "acronym";
     }
+
+    @Override
+    public String noPrompt(String[] body) {
+        return "";
+    }
 }

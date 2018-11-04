@@ -101,6 +101,12 @@ public class App {
                         }
                     }
                 }
+                for (Module module : modules) {
+                    String response = module.noPrompt(lastMessageJson.getBody().split(" "));
+                    if (response.length() > 0) {
+                        Matrix.sendMessage(protocol, homeServer, "r0", roomID, accessToken, response);
+                    }
+                }
             }
             if (lastMessageJson.getBody().equals("hello bot")) {
                 Matrix.sendMessage(protocol, homeServer, "r0", roomID, accessToken, "yo what's up");

@@ -71,6 +71,9 @@ public class Core implements Module {
         } else if (moduleName.equals("acronym")) {
             loadedModules.add(new Acronym());
             moduleCommandResponse += "acronym loaded";
+        } else if (moduleName.equals("yes / no")) {
+            loadedModules.add(new YesNo());
+            moduleCommandResponse += "yes / no loaded";
         }
         modulesAndModuleCommandResponse = new ModulesAndModuleCommandResponse(loadedModules, moduleCommandResponse);
         return modulesAndModuleCommandResponse;
@@ -113,4 +116,7 @@ public class Core implements Module {
     public String getName() {
         return "core";
     }
+
+    @Override
+    public String noPrompt(String[] body) { return ""; }
 }
