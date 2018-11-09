@@ -16,6 +16,8 @@ public class Modules {
                 modules.add(new Acronym());
             } else if(moduleName.equals("yesno")) {
                 modules.add(new YesNo());
+            } else if(moduleName.equals("cioran")) {
+                modules.add(new Cioran());
             }
         }
         return modules;
