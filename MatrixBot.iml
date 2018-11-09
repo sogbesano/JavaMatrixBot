@@ -18,7 +18,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="gson-2.8.5.jar">
         <CLASSES>
           <root url="file://gson-2.8.5.jar" />
@@ -27,7 +27,7 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="httpcore-4.4.10.jar">
         <CLASSES>
           <root url="file://httpcore-4.4.10.jar" />
@@ -36,7 +36,7 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="httpclient-4.3.4.jar">
         <CLASSES>
           <root url="file://httpclient-4.3.4.jar" />
@@ -45,7 +45,7 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="httpcore-4.4.3.jar">
         <CLASSES>
           <root url="file://httpcore-4.4.3.jar" />
@@ -54,7 +54,7 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="commons-logging-1.2.jar">
         <CLASSES>
           <root url="file://commons-logging-1.2.jar" />
@@ -63,10 +63,10 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="gson-2.8.5" level="project" />
-    <orderEntry type="library" name="commons-logging-1.2" level="project" />
-    <orderEntry type="library" name="httpclient-4.3.4" level="project" />
-    <orderEntry type="library" name="httpcore-4.4.3" level="project" />
-    <orderEntry type="library" name="jsoup-1.11.3" level="project" />
+    <orderEntry type="library" exported="" name="gson-2.8.5" level="project" />
+    <orderEntry type="library" exported="" name="commons-logging-1.2" level="project" />
+    <orderEntry type="library" exported="" name="httpclient-4.3.4" level="project" />
+    <orderEntry type="library" exported="" name="httpcore-4.4.3" level="project" />
+    <orderEntry type="library" exported="" name="jsoup-1.11.3" level="project" />
   </component>
 </module>
