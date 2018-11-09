@@ -32,7 +32,6 @@ public class Cioran implements Module {
         br.close();
         Document doc = Jsoup.parse(cioranHtmlStr.toString());
         Elements liLInks = doc.getElementsByTag("li");
-        String quoteLinksStr = "";
         List<Element> quoteLinks = new ArrayList<>();
         int i = 0;
         for(Element liLink : liLInks) {
@@ -44,10 +43,6 @@ public class Cioran implements Module {
         Random random = new Random();
         int choice = random.nextInt(quoteLinks.size());
         String cioranQuote = quoteLinks.get(choice).text();
-        for(Element quoteLink : quoteLinks) {
-            quoteLinksStr += quoteLink.text() + "\n";
-        }
-        System.out.println(quoteLinks.size());
         return cioranQuote;
     }
 
