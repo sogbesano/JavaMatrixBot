@@ -77,6 +77,8 @@ public class Core implements Module {
         } else if (moduleName.equals("cioran")) {
             loadedModules.add(new Cioran());
             moduleCommandResponse += "cioran loaded";
+        } else if (moduleName.equals("log")) {
+            loadedModules.add(new Log());
         }
         modulesAndModuleCommandResponse = new ModulesAndModuleCommandResponse(loadedModules, moduleCommandResponse);
         return modulesAndModuleCommandResponse;

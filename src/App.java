@@ -101,6 +101,10 @@ public class App {
 
                 for (Module module : modules) {
                     String response = module.noPrompt(lastMessageJson.getBody().split(" "));
+                    if(module.getName().equals("log")) {
+                        Log logModule = new Log(lastMessageJson, settings);
+                        response = logModule.noPrompt(lastMessageJson.getBody().split(" "));
+                    }
                     if (response.length() > 0) {
                         connection.sendMessage(roomID, response);
                     }

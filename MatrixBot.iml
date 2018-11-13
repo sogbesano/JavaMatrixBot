@@ -68,5 +68,6 @@
     <orderEntry type="library" exported="" name="httpclient-4.3.4" level="project" />
     <orderEntry type="library" exported="" name="httpcore-4.4.3" level="project" />
     <orderEntry type="library" exported="" name="jsoup-1.11.3" level="project" />
+    <orderEntry type="library" exported="" name="sqlite-jdbc-3.23.1" level="project" />
   </component>
 </module>

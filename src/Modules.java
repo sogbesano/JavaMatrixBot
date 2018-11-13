@@ -18,6 +18,8 @@ public class Modules {
                 modules.add(new YesNo());
             } else if(moduleName.equals("cioran")) {
                 modules.add(new Cioran());
+            } else if(moduleName.equals("log")) {
+                modules.add(new Log());
             }
         }
         return modules;
