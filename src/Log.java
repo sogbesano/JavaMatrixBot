@@ -11,6 +11,8 @@ public class Log implements Module {
     private MessageJson lastMessage;
     private SettingsJson settings;
 
+    static List<String> imageFileFormats = Arrays.asList(".tiff", ".tif", ".gif", ".jpeg", ".jpg",".png");
+
     public Log(MessageJson lastMessage, SettingsJson settings) {
         this.lastMessage = lastMessage;
         this.settings = settings;
@@ -100,10 +102,19 @@ public class Log implements Module {
                     }
                 }
             }
+            boolean isImage = false;
+            for(String imageFileFormat : Log.imageFileFormats) {
+                if(lastMessage != null) {
+                    if (lastMessage.getBody().endsWith(imageFileFormat)) {
+                        isImage = true;
+                    }
+                }
+            }
             if (this.lastMessage != null && this.settings != null) {
                 if (!this.lastMessage.getSender().equals("@" + this.settings.getUsername() + ":" + this.settings.getHomeServer())
                         && !this.lastMessage.getBody().startsWith(this.settings.getModulePrompt())
-                        && !foundMessage) {
+                        && !foundMessage
+                        && !isImage) {
                     sql = "INSERT INTO messages(message,date,sender) VALUES(?, ?, ?)";//insert into table
                     PreparedStatement preparedStatement = conn.prepareStatement(sql);
                     preparedStatement.setString(1, message);
