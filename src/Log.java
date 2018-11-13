@@ -111,9 +111,7 @@ public class Log implements Module {
                     String formattedDate = DateTimeFormatter.ofPattern("dd-MM-yyyy", Locale.ENGLISH).format(ldt);
                     preparedStatement.setString(2, formattedDate.replaceAll("-", "/"));
                     preparedStatement.setString(3, this.lastMessage.getSender());
-                    if (!this.lastMessage.getSender().equals("@" + this.settings.getUsername() + ":" + this.settings.getHomeServer())) {
-                        preparedStatement.executeUpdate();
-                    }
+                    preparedStatement.executeUpdate();
                 }
             }
         } catch (SQLException e) {
