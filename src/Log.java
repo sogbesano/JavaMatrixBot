@@ -90,7 +90,8 @@ public class Log implements Module {
             }
             message = message.substring(0, message.length() - 1);//remove end space
             //check if message already exists in messages table
-            sql = "SELECT count(*) FROM messages WHERE message = ?";
+            //sql = "SELECT COUNT(*) FROM messages WHERE message = ?";
+            sql = "SELECT * FROM messages WHERE message = ?";
             PreparedStatement pst = conn.prepareStatement(sql);
             boolean foundMessage = false;
             if (lastMessage != null) {
