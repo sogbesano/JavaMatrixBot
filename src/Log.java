@@ -114,7 +114,8 @@ public class Log implements Module {
                         && !this.lastMessage.getBody().startsWith(this.settings.getModulePrompt())
                         && !foundMessage
                         && !isImage) {
-                    sql = "INSERT OR IGNORE INTO messages(message,date,sender) VALUES(?, ?, ?)";//insert into table or ignore if already record exists
+                    //insert into table or ignore if record already exists
+                    sql = "INSERT OR IGNORE INTO messages(message,date,sender) VALUES(?, ?, ?)";
                     PreparedStatement preparedStatement = conn.prepareStatement(sql);
                     preparedStatement.setString(1, message);
                     LocalDateTime ldt = LocalDateTime.now();
