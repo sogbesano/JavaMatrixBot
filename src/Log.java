@@ -90,15 +90,14 @@ public class Log implements Module {
             }
             message = message.substring(0, message.length() - 1);//remove end space
             //check if message already exists in messages table
-            String query = "SELECT (count(*) > 0) as found FROM messages WHERE message LIKE ?";
-            PreparedStatement pst = conn.prepareStatement(query);
+            sql = "SELECT count(*) FROM messages WHERE message = ?";
+            PreparedStatement pst = conn.prepareStatement(sql);
             boolean foundMessage = false;
             if (lastMessage != null) {
                 pst.setString(1, lastMessage.getBody());
                 try (ResultSet rs = pst.executeQuery()) {
-                    // Only expecting a single result
                     if (rs.next()) {
-                        foundMessage = rs.getBoolean(1); // "found" column
+                        foundMessage = true; // "found" column
                     }
                 }
             }
