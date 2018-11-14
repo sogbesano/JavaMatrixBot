@@ -93,8 +93,8 @@ public class Log implements Module {
             sql = "SELECT * FROM messages WHERE message = ?";
             PreparedStatement pst = conn.prepareStatement(sql);
             boolean foundMessage = false;
-            if (lastMessage != null) {
-                pst.setString(1, lastMessage.getBody());
+            if (this.lastMessage != null) {
+                pst.setString(1, this.lastMessage.getBody());
                 try (ResultSet rs = pst.executeQuery()) {
                     if (rs.next()) {
                         foundMessage = true; // "found" column
@@ -103,8 +103,8 @@ public class Log implements Module {
             }
             boolean isImage = false;
             for(String imageFileFormat : Log.imageFileFormats) {
-                if(lastMessage != null) {
-                    if (lastMessage.getBody().endsWith(imageFileFormat)) {
+                if(this.lastMessage != null) {
+                    if (this.lastMessage.getBody().endsWith(imageFileFormat)) {
                         isImage = true;
                     }
                 }
@@ -114,7 +114,7 @@ public class Log implements Module {
                         && !this.lastMessage.getBody().startsWith(this.settings.getModulePrompt())
                         && !foundMessage
                         && !isImage) {
-                    sql = "INSERT INTO messages(message,date,sender) VALUES(?, ?, ?)";//insert into table
+                    sql = "INSERT OR IGNORE INTO messages(message,date,sender) VALUES(?, ?, ?)";//insert into table or ignore if already record exists
                     PreparedStatement preparedStatement = conn.prepareStatement(sql);
                     preparedStatement.setString(1, message);
                     LocalDateTime ldt = LocalDateTime.now();
