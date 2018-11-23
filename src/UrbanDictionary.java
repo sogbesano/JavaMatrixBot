@@ -18,6 +18,7 @@ public class UrbanDictionary implements Module {
         for(Object param : params) {
             urbanDictionaryWord += (String) param + " ";
         }
+        String urbanDictionaryDefinition = String.format("unable to find a definition for %s", urbanDictionaryWord);
         if(params.size() >= 1) {
             urbanDictionaryWord = urbanDictionaryWord.substring(0, urbanDictionaryWord.length() - 1);//remove end space
             String urbanDictionaryUrlStr = String.format("http://api.urbandictionary.com/v0/define?term={%s}", urbanDictionaryWord);
@@ -33,13 +34,11 @@ public class UrbanDictionary implements Module {
             br.close();
             Gson gson = new Gson();
             JsonObject urbanDictionaryAPIResponseJson =  gson.fromJson(urbanDictionaryAPIResponseJsonStr.toString(), JsonObject.class);
-            String urbanDictionaryDefinition = String.format("unable to find a definition for %s", urbanDictionaryWord);
             if(urbanDictionaryAPIResponseJson.get("list").getAsJsonArray().size() != 0) {
                 urbanDictionaryDefinition = gson.fromJson(urbanDictionaryAPIResponseJson.get("list").getAsJsonArray().get(0).toString(), JsonObject.class).get("definition").getAsString();
             }
-            return urbanDictionaryDefinition;
         }
-        return urbanDictionaryWord;
+        return urbanDictionaryDefinition;
     }
 
     @Override
