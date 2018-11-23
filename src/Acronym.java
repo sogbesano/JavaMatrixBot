@@ -6,7 +6,7 @@ import java.util.Random;
 public class Acronym implements Module {
 
     public static String acronym(List<Object> params) {
-        char[] letters = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+        char[] letters;
         String acronymStr = "";
         int acronymLength = 5;
         if(params.size() != 0) {
@@ -14,7 +14,17 @@ public class Acronym implements Module {
         }
         Random random = new Random();
         for(int i = 0; i < acronymLength; i++) {
-            acronymStr += letters[random.nextInt(letters.length)];
+            letters = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+            char letter = letters[random.nextInt(letters.length)];
+            if(letter == 'q' || letter == 'x' || letter == 'z') {
+                int probability = random.nextInt(5);
+                //20% chance that the letter will remain q, x or z
+                if(probability > 0) {
+                    letters = "abcdefghijklmnoprstuvwy".toCharArray();
+                    letter = letters[random.nextInt(letters.length)];
+                }
+            }
+            acronymStr += letter;
         }
         return acronymStr;
     }
