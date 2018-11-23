@@ -1,4 +1,5 @@
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,7 +33,10 @@ public class UrbanDictionary implements Module {
             br.close();
             Gson gson = new Gson();
             JsonObject urbanDictionaryAPIResponseJson =  gson.fromJson(urbanDictionaryAPIResponseJsonStr.toString(), JsonObject.class);
-            String urbanDictionaryDefinition = gson.fromJson(urbanDictionaryAPIResponseJson.get("list").getAsJsonArray().get(0).toString(), JsonObject.class).get("definition").getAsString();
+            String urbanDictionaryDefinition = String.format("unable to find a definition for %s", urbanDictionaryWord);
+            if(urbanDictionaryAPIResponseJson.get("list").getAsJsonArray().size() != 0) {
+                urbanDictionaryDefinition = gson.fromJson(urbanDictionaryAPIResponseJson.get("list").getAsJsonArray().get(0).toString(), JsonObject.class).get("definition").getAsString();
+            }
             return urbanDictionaryDefinition;
         }
         return urbanDictionaryWord;
