@@ -111,7 +111,7 @@ public class MarkovTalk implements Module {
                 generatingText = false;
             }
         }
-        return talkText;
+        return talkText.trim();
     }
 
     @Override
