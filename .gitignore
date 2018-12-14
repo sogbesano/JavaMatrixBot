@@ -3,5 +3,6 @@
 settings.json
 MatrixBot.jar
 log.db
+markov.db
 bin/
 bin/*

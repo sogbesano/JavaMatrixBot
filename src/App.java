@@ -101,6 +101,10 @@ public class App {
 
                 for (Module module : modules) {
                     String response = module.noPrompt(lastMessageJson.getBody().split(" "));
+                    if(module.getName().equals("markov talk")) {
+                        MarkovTalk markovTalkModule = new MarkovTalk(lastMessageJson, settings);
+                        response = markovTalkModule.noPrompt(lastMessageJson.getBody().split(" "));
+                    }
                     if(module.getName().equals("log")) {
                         Log logModule = new Log(lastMessageJson, settings);
                         response = logModule.noPrompt(lastMessageJson.getBody().split(" "));

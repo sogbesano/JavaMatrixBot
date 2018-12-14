@@ -79,6 +79,10 @@ public class Core implements Module {
             moduleCommandResponse += "cioran loaded";
         } else if (moduleName.equals("log")) {
             loadedModules.add(new Log());
+            moduleCommandResponse += "log loaded";
+        } else if (moduleName.equals("markov talk")) {
+            loadedModules.add(new MarkovTalk());
+            moduleCommandResponse += "markov talk loaded";
         }
         modulesAndModuleCommandResponse = new ModulesAndModuleCommandResponse(loadedModules, moduleCommandResponse);
         return modulesAndModuleCommandResponse;

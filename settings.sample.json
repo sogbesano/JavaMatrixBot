@@ -3,6 +3,6 @@
   "username":"narkoman",
   "password":"password1",
   "room_name":"#example:matrix.org",
-  "modules":["core", "urban dictionary", "acronym", "yesno", "cioran", "log"],
+  "modules":["core", "urban dictionary", "acronym", "yesno", "cioran", "log", "markov talk"],
   "module_prompt":"%"
 }

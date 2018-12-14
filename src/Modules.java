@@ -20,6 +20,8 @@ public class Modules {
                 modules.add(new Cioran());
             } else if(moduleName.equals("log")) {
                 modules.add(new Log());
+            } else if(moduleName.equals("markov talk")) {
+                modules.add(new MarkovTalk());
             }
         }
         return modules;
