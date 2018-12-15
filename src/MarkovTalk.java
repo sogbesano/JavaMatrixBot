@@ -49,10 +49,7 @@ public class MarkovTalk implements Module {
     private static String getNextWord(Map<String, List<String>> wordsDictionary, String previousWord) {
         if(previousWord.equals("\n")
                 || previousWord.endsWith("\n")
-                || previousWord.endsWith("\\")
                 || previousWord.contains("\n")
-                || previousWord.contains("\n\n")
-                || previousWord.contains("\"")
                 || previousWord.endsWith(".")) {
             return "";
         }
