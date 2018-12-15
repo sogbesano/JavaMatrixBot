@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +38,18 @@ public class App {
         connection.sync();
 
         List<Module> modules = getModules(settings);
+
+        String sql = "SELECT message FROM messages";
+        String inputText = "";
+        try(Connection conn = MarkovTalk.connect();
+            Statement statement = conn.createStatement();
+            ResultSet rs = statement.executeQuery(sql)) {
+            while(rs.next()) {
+                inputText += rs.getString("message") + "\n";
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
 
         while (true) {
             MessageJson lastMessageJson = connection.extractLastMessage(roomID);

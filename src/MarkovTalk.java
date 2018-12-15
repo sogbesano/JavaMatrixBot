@@ -27,8 +27,9 @@ public class MarkovTalk implements Module {
     }
 
     private static Map<String, List<String>> buildDictionary(String inputText) {
-        List<String> inputTextSplit = Arrays.asList(inputText.split("((?<=[\\s\\.]+)|(?=[\\s\\.]+))"));
-        inputTextSplit = MarkovTalk.removeWhiteSpace(inputTextSplit);
+        //List<String> inputTextSplit = Arrays.asList(inputText.split("((?<=[\\s\\.]+)|(?=[\\s\\.]+))"));
+        List<String> inputTextSplit = Arrays.asList(inputText.split(" "));
+        //inputTextSplit = MarkovTalk.removeWhiteSpace(inputTextSplit);
         Map<String, List<String>> dictionary = new HashMap<>();
         List<String> wordSuffixes;
         for (int i = 0; i < inputTextSplit.size(); i++) {
@@ -61,7 +62,7 @@ public class MarkovTalk implements Module {
         return "";
     }
 
-    private static Connection connect() {
+    public static Connection connect() {
         // SQLite connection string
         String url = "jdbc:sqlite:markov.db";
         Connection conn = null;
@@ -74,19 +75,18 @@ public class MarkovTalk implements Module {
     }
 
     public static String talk() {
-        //String text = this.lastMessage.getBody();
         String sql = "SELECT message FROM messages";
-        String text = "";
+        String inputText = "";
         try(Connection conn = MarkovTalk.connect();
-            Statement statement = conn.createStatement();
-            ResultSet rs = statement.executeQuery(sql)) {
-            while(rs.next()) {
-                text += rs.getString("message") + "\n";
+           Statement statement = conn.createStatement();
+           ResultSet rs = statement.executeQuery(sql)) {
+           while(rs.next()) {
+              inputText += rs.getString("message") + "\n";
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        Map<String, List<String>> wordsDictionary = MarkovTalk.buildDictionary(text);
+        Map<String, List<String>> wordsDictionary = MarkovTalk.buildDictionary(inputText);
         Random rand = new Random();
         boolean gettingStartWord = true;
         String startWord = "";
@@ -107,7 +107,11 @@ public class MarkovTalk implements Module {
             if(!nextWord.isEmpty() || !nextWord.equals("\n")) {
                 talkText += " " + nextWord;
             }
-            if (nextWord.isEmpty() || nextWord.equals(".") || nextWord.equals("\n")) {
+            if (nextWord.isEmpty()
+                    || nextWord.equals(".")
+                    || nextWord.equals("\n")
+                    || nextWord.endsWith(".")
+                    || nextWord.endsWith("\n")) {
                 generatingText = false;
             }
         }
