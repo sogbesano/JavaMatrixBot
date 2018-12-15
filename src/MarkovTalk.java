@@ -47,14 +47,20 @@ public class MarkovTalk implements Module {
     }
 
     private static String getNextWord(Map<String, List<String>> wordsDictionary, String previousWord) {
-        if(previousWord.equals("\n") || previousWord.equals(".") || previousWord.isEmpty()) {
+        if(previousWord.equals("\n")
+                || previousWord.endsWith("\n")
+                || previousWord.endsWith("\\")
+                || previousWord.contains("\n")
+                || previousWord.contains("\n\n")
+                || previousWord.contains("\"")
+                || previousWord.endsWith(".")) {
             return "";
         }
         List<String> wordSuffixes = wordsDictionary.get(previousWord);
         if(wordSuffixes.size() != 0) {
             Random rand = new Random();
             String nextWord = wordSuffixes.get(rand.nextInt(wordSuffixes.size()));
-            if (nextWord == null) {
+            if(nextWord == null) {
                 return "";
             }
             return nextWord;
@@ -62,8 +68,7 @@ public class MarkovTalk implements Module {
         return "";
     }
 
-    public static Connection connect() {
-        // SQLite connection string
+    private static Connection connect() {
         String url = "jdbc:sqlite:markov.db";
         Connection conn = null;
         try {
@@ -95,16 +100,19 @@ public class MarkovTalk implements Module {
             if (wordSuffixes.size() > 0) {
                 startWord = wordSuffixes.get(rand.nextInt(wordSuffixes.size()));
             }
+            if (startWord.contains("\n")) {
+                gettingStartWord = true;
+            }
             if (!startWord.equals("") || !startWord.equals(".")) {
                 gettingStartWord = false;
             }
         }
         boolean generatingText = true;
         String talkText = startWord;
-        String nextWord = MarkovTalk.getNextWord(wordsDictionary, startWord);
+        String nextWord = startWord;
         while (generatingText) {
             nextWord = MarkovTalk.getNextWord(wordsDictionary, nextWord);
-            if(!nextWord.isEmpty() || !nextWord.equals("\n")) {
+            if(!nextWord.isEmpty() || !nextWord.contains("\n")) {
                 talkText += " " + nextWord;
             }
             if (nextWord.isEmpty()
