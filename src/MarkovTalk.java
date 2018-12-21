@@ -97,9 +97,6 @@ public class MarkovTalk implements Module {
             if (wordSuffixes.size() > 0) {
                 startWord = wordSuffixes.get(rand.nextInt(wordSuffixes.size()));
             }
-            if (startWord.contains("\n")) {
-                gettingStartWord = true;
-            }
             if (!startWord.equals("") || !startWord.equals(".")) {
                 gettingStartWord = false;
             }
@@ -114,13 +111,23 @@ public class MarkovTalk implements Module {
             }
             if (nextWord.isEmpty()
                     || nextWord.equals(".")
-                    || nextWord.equals("\n")
-                    || nextWord.endsWith(".")
-                    || nextWord.endsWith("\n")) {
+                    || nextWord.endsWith(".")) {
                 generatingText = false;
             }
         }
-        return talkText.trim();
+        talkText = talkText
+                .trim()
+                .replace("\\n", " ")
+                .replaceAll(" +", " ");
+        if(talkText.endsWith(".")) {
+            return talkText;
+        } else {
+            if(talkText.contains(".")) {
+                return talkText.substring(0, talkText.lastIndexOf("."));
+            } else {
+                return talkText;
+            }
+        }
     }
 
     @Override
