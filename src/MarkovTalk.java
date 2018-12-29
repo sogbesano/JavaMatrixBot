@@ -101,23 +101,19 @@ public class MarkovTalk implements Module {
                 gettingStartWord = false;
             }
         }
-        boolean generatingText = true;
         String talkText = startWord;
         String nextWord = startWord;
-        while (generatingText) {
+        while (true) {
             nextWord = MarkovTalk.getNextWord(wordsDictionary, nextWord);
-            if(!nextWord.isEmpty() || !nextWord.contains("\n")) {
-                talkText += " " + nextWord;
-            }
-            if (nextWord.isEmpty()
-                    || nextWord.equals(".")
-                    || nextWord.endsWith(".")) {
-                generatingText = false;
+            talkText += " " + nextWord;
+            if (nextWord.endsWith(".")) {
+                break;
             }
         }
         talkText = talkText
                 .trim()
                 .replace("\\n", " ")
+                .replace("\n", " ")
                 .replaceAll(" +", " ");
         if(talkText.endsWith(".")) {
             return talkText;
