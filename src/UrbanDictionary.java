@@ -21,6 +21,7 @@ public class UrbanDictionary implements Module {
         String urbanDictionaryDefinition = String.format("unable to find a definition for %s", urbanDictionaryWord);
         if(params.size() >= 1) {
             urbanDictionaryWord = urbanDictionaryWord.substring(0, urbanDictionaryWord.length() - 1);//remove end space
+            urbanDictionaryWord = urbanDictionaryWord.replaceAll("\\s", "%20");
             String urbanDictionaryUrlStr = String.format("http://api.urbandictionary.com/v0/define?term={%s}", urbanDictionaryWord);
             URL url = new URL(urbanDictionaryUrlStr);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
