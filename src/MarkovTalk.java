@@ -48,6 +48,8 @@ public class MarkovTalk implements Module {
 
     private static String getNextWord(Map<String, List<String>> wordsDictionary, String previousWord) {
         if(previousWord.equals("\n")
+                || previousWord.equals(" ")
+                || previousWord == null
                 || previousWord.endsWith("\n")
                 || previousWord.contains("\n")
                 || previousWord.endsWith(".")) {
@@ -77,13 +79,15 @@ public class MarkovTalk implements Module {
     }
 
     public static String talk() {
-        String sql = "SELECT message FROM messages";
+        String sql = "SELECT message FROM messages ORDER BY random()";
         String inputText = "";
+        int messagesLimit = 1500;
         try(Connection conn = MarkovTalk.connect();
            Statement statement = conn.createStatement();
            ResultSet rs = statement.executeQuery(sql)) {
-           while(rs.next()) {
+           while(rs.next() && messagesLimit > 0) {
               inputText += rs.getString("message") + "\n";
+              messagesLimit--;
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -106,7 +110,7 @@ public class MarkovTalk implements Module {
         while (true) {
             nextWord = MarkovTalk.getNextWord(wordsDictionary, nextWord);
             talkText += " " + nextWord;
-            if (nextWord.endsWith(".")) {
+            if (nextWord.endsWith(".") || nextWord.equals("")) {
                 break;
             }
         }

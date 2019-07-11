@@ -12,7 +12,6 @@ import java.util.List;
 
 public class UrbanDictionary implements Module {
 
-
     public static String ud(List<Object> params) throws IOException {
         String urbanDictionaryWord = "";
         for(Object param : params) {
