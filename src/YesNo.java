@@ -24,7 +24,7 @@ public class YesNo implements Module {
 
     @Override
     public String noPrompt(String[] body) {
-        if (body.length > 0 && modalVerbs.contains(body[0])) {
+        if (body.length > 0 && modalVerbs.contains(body[0].toLowerString())) {
             return replies.get(rng.nextInt(2));
         }
         return "";
